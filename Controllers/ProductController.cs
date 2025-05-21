@@ -31,8 +31,24 @@
         [HttpPost]
         public async Task<IActionResult> Create(Product product)
         {
+            // Yeni boş liste oluştur
+            var selectedTags = new List<Tag>();
+
+            // Gönderilen tag ID'lerine göre veritabanından gerçek tag'leri getir
+            foreach (var tag in product.Tags)
+            {
+                var existingTag = await _context.Tags.FindAsync(tag.Id);
+                if (existingTag != null)
+                {
+                    selectedTags.Add(existingTag);
+                }
+            }
+
+            product.Tags = selectedTags;
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
         }
 
